@@ -110,7 +110,7 @@ async fn main() -> std::io::Result<()> {
                 }
             }
             println!(
-                "{} @ {} on {} :\t {} - {}",
+                "{:<3} @ {:<3} on {} :\t {} - {}",
                 away_team,
                 home_team,
                 d.with_timezone(&Eastern),
