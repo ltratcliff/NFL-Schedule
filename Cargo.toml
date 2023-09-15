@@ -1,0 +1,20 @@
+[package]
+name = "nfl"
+version = "0.1.0"
+edition = "2021"
+author = "Tom R. <ltratcliff@gmail.com>"
+description = "NFL schedule in your terminal"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4.30"
+chrono-tz = "0.8.3"
+clap = { version = "4.4.3", features = ["derive"] }
+colored = "2.0.4"
+reqwest = { version = "0.11.20", features = ["json"] }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.106"
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"
