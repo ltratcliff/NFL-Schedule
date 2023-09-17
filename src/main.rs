@@ -4,8 +4,7 @@
 pub mod structs;
 
 use crate::structs::Root;
-use chrono::{TimeZone, Utc};
-use chrono_tz::US::Eastern;
+use chrono::{TimeZone, DateTime, Local, NaiveDateTime};
 use clap::Parser;
 use colored::{ColoredString, Colorize};
 use reqwest::Client;
@@ -20,6 +19,14 @@ use tracing::{debug};
 struct Args {
     /// week number
     week: String,
+}
+
+struct Game {
+    home_team: ColoredString,
+    away_team: ColoredString,
+    home_score: ColoredString,
+    away_score: ColoredString,
+    date: DateTime<Local>,
 }
 
 #[tokio::main]
@@ -78,12 +85,13 @@ async fn main() -> std::io::Result<()> {
     let deserialized: Root = serde_json::from_str(&response).unwrap();
     // let g = deserialized.content.schedule.n20230911.games;
     let games = deserialized.content.schedule;
+    let mut sorted_games: Vec<Game> = Vec::new();
 
     //TODO: sqlite DB?
     for (_k, v) in games.into_iter() {
         for g in v.games.into_iter() {
-            // let d = NaiveDateTime::parse_from_str(&g.date, "%Y-%m-%dT%H:%MZ").unwrap();
-            let d = Utc.datetime_from_str(&g.date, "%Y-%m-%dT%H:%M%Z").unwrap();
+            let naive = NaiveDateTime::parse_from_str(&g.date, "%Y-%m-%dT%H:%MZ").unwrap();
+            let d: DateTime<Local> = Local.from_utc_datetime(&naive);
             let mut home_team: ColoredString = "".to_string().white();
             let mut away_team: ColoredString = "".to_string().white();
             let mut home_score: ColoredString = "".to_string().white();
@@ -109,16 +117,25 @@ async fn main() -> std::io::Result<()> {
                     }
                 }
             }
-            println!(
-                "{:<3} @ {:<3} on {} :\t {} - {}",
-                away_team,
+            sorted_games.push(Game {
                 home_team,
-                d.with_timezone(&Eastern),
+                away_team,
+                home_score,
                 away_score,
-                home_score
-            )
+                date: d,
+            });
         }
     }
-
+    sorted_games.sort_by(|a, b| a.date.cmp(&b.date));
+    for g in sorted_games {
+        println!(
+            "{:<3} @ {:<3} on {} :\t {} - {}",
+            g.away_team,
+            g.home_team,
+            g.date.format("%m-%d %I:%M %p"),
+            g.away_score,
+            g.home_score
+        )
+    }
     Ok(())
 }
