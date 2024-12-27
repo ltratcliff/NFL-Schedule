@@ -29,6 +29,8 @@ struct Game {
     date: DateTime<Local>,
 }
 
+
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     tracing_subscriber::fmt()
@@ -67,9 +69,10 @@ async fn main() -> std::io::Result<()> {
     } else {
         debug!("NFL Json does not exist, pulling from API");
         let c = Client::new();
+        let local = Local::now();
         let api_url = format!(
-            "https://cdn.espn.com/core/nfl/schedule?xhr=1&year=2023&week={}",
-            args.week
+            "https://cdn.espn.com/core/nfl/schedule?xhr=1&year={}&week={}",
+            local.format("%Y"), args.week
         );
         let response = c.get(api_url).send().await.unwrap().text().await.unwrap();
         debug!("Writing JSON to tmp");
